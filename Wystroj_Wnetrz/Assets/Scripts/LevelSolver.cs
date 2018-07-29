@@ -213,6 +213,8 @@ public class LevelSolver : MonoBehaviour
                 (result.Result.Position.y > alignment.FloorYValue))
             {
                 GameObject newGameObject = UnityEngine.Object.Instantiate(result.MyGameObject, result.Result.Position, Quaternion.LookRotation(result.Result.Forward, Vector3.up));
+                newGameObject.AddComponent<HoloToolkit.Unity.InputModule.HandDraggable>();
+                newGameObject.AddComponent<BoxCollider>();
             }
         }
 
