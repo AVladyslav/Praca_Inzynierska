@@ -12,7 +12,6 @@ public class TapManager : MonoBehaviour, IInputClickHandler
 
     public void OnInputClicked(InputClickedEventData eventData)
     {
-        Debug.Log("Tap");
         switch (SpatialUnderstanding.Instance.ScanState)
         {
             case SpatialUnderstanding.ScanStates.None:
@@ -35,20 +34,21 @@ public class TapManager : MonoBehaviour, IInputClickHandler
 
     private void HandleTap()
     {
-        if (SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Done)
-        {
-            Debug.Log("Cursor position: " + cursor.transform.position.ToString());
-        }
+        Debug.Log("Cursor position: " + cursor.transform.position.ToString());
+        LevelSolver.Instance.PlaceObject_OnFloor_NearPoint(desk, cursor.transform.position);
     }
 
     // Use this for initialization
     void Start () {
         InputManager.Instance.PushFallbackInputHandler(gameObject); //handle Tap gesture anywhere, excluding gameObjects
         cursor = GameObject.Find("DefaultCursor") as GameObject;
-	}
-	
-	// Update is called once per frame
-	void Update () {
+        if (!LevelSolver.Instance.IsSolverInitialized)
+            LevelSolver.Instance.InitializeSolver();
+
+    }
+
+    // Update is called once per frame
+    void Update () {
 		
 	}
 }
