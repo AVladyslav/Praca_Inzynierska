@@ -6,9 +6,16 @@ public class ObjectProperties : MonoBehaviour {
 
     public struct ObjProperties
     {
-        Placement placement;
-        ObjectType objectType;
-        string objectName;
+        public Placement PlacementType;
+        public ObjectType ObjectType;
+        public string ObjectName;
+
+        public ObjProperties(Placement placementType, ObjectType pObjectType, string objectName)
+        {
+            this.PlacementType = placementType;
+            this.ObjectType = pObjectType;
+            this.ObjectName = objectName;
+        }
     }
 
     public bool IsPropertiesAreSet { get; private set; }

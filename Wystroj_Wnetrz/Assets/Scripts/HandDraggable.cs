@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using UnityEngine;
@@ -37,7 +37,17 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
         OrientTowardUserAndKeepUpright
     }
 
-    public RotationModeEnum RotationMode = RotationModeEnum.Default;
+    public RotationModeEnum RotationMode = RotationModeEnum.LockObjectRotation;
+
+    public enum MovingModeEnum
+    {
+        ForwardBackward,
+        LeftRight,
+        UpDown,
+        Lock
+    }
+
+    public MovingModeEnum MovingMode = MovingModeEnum.ForwardBackward;
 
     [Tooltip("Controls the speed at which the object will interpolate toward the desired position")]
     [Range(0.01f, 1.0f)]
@@ -63,6 +73,10 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
 
     private IInputSource currentInputSource;
     private uint currentInputSourceId;
+
+    private Transform startDraggingCameraTransform;
+    private Matrix4x4 localToWorld;
+    private Matrix4x4 worldToLocal;
 
     private void Start()
     {
@@ -108,6 +122,7 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
             return;
         }
 
+
         // Add self as a modal input handler, to get all inputs during the manipulation
         InputManager.Instance.PushModalInputHandler(gameObject);
 
@@ -135,7 +150,14 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
         objDirection = cameraTransform.InverseTransformDirection(objDirection);   // in camera space
         handDirection = cameraTransform.InverseTransformDirection(handDirection); // in camera space
 
-        switch (gameObject.tag)
+        startDraggingCameraTransform = CameraCache.Main.transform;
+        localToWorld = CameraCache.Main.transform.localToWorldMatrix;
+        worldToLocal = CameraCache.Main.transform.worldToLocalMatrix;
+
+        Debug.Log("Dragging is started.");
+
+        //TODO: dokończyć
+        /*switch (gameObject.tag)
         {
             case Placement.Floor.ToString():
                 break;
@@ -145,7 +167,7 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
                 break;
             default:
                 break;
-        }
+        }*/
 
         objRefForward = objForward;
         objRefUp = objUp;
@@ -191,17 +213,19 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
     /// </summary>
     private void UpdateDragging()
     {
+        Debug.Log("position = " + startDraggingCameraTransform.position + ", rotation = " + startDraggingCameraTransform.rotation);
+
         Vector3 newHandPosition;
-        Transform cameraTransform = CameraCache.Main.transform;
+        //Transform cameraTransform = CameraCache.Main.transform;
         currentInputSource.TryGetPosition(currentInputSourceId, out newHandPosition);
 
-        Vector3 pivotPosition = GetHandPivotPosition(cameraTransform);
+        Vector3 pivotPosition = GetHandPivotPosition(startDraggingCameraTransform);
 
         Vector3 newHandDirection = Vector3.Normalize(newHandPosition - pivotPosition);
 
-        newHandDirection = cameraTransform.InverseTransformDirection(newHandDirection); // in camera space
+        newHandDirection = startDraggingCameraTransform.InverseTransformDirection(newHandDirection); // in camera space
         Vector3 targetDirection = Vector3.Normalize(gazeAngularOffset * newHandDirection);
-        targetDirection = cameraTransform.TransformDirection(targetDirection); // back to world space
+        targetDirection = startDraggingCameraTransform.TransformDirection(targetDirection); // back to world space
 
         float currentHandDistance = Vector3.Magnitude(newHandPosition - pivotPosition);
 
@@ -221,13 +245,15 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
         }
         else // RotationModeEnum.Default
         {
-            Vector3 objForward = cameraTransform.TransformDirection(objRefForward); // in world space
-            Vector3 objUp = cameraTransform.TransformDirection(objRefUp);   // in world space
+            Vector3 objForward = startDraggingCameraTransform.TransformDirection(objRefForward); // in world space
+            Vector3 objUp = startDraggingCameraTransform.TransformDirection(objRefUp);   // in world space
             draggingRotation = Quaternion.LookRotation(objForward, objUp);
         }
 
+        SetNewPositionForObject();
+
         // Apply Final Position
-        HostTransform.position = Vector3.Lerp(HostTransform.position, draggingPosition + cameraTransform.TransformDirection(objRefGrabPoint), PositionLerpSpeed);
+        //HostTransform.position = Vector3.Lerp(HostTransform.position, draggingPosition + cameraTransform.TransformDirection(objRefGrabPoint), PositionLerpSpeed);
         // Apply Final Rotation
         HostTransform.rotation = Quaternion.Lerp(HostTransform.rotation, draggingRotation, RotationLerpSpeed);
 
@@ -236,6 +262,52 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
             Quaternion upRotation = Quaternion.FromToRotation(HostTransform.up, Vector3.up);
             HostTransform.rotation = upRotation * HostTransform.rotation;
         }
+    }
+
+    private void SetNewPositionForObject()
+    {
+        Vector3 oldPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+        Debug.Log("cameraTransform. pos + rot. = " + startDraggingCameraTransform.position + startDraggingCameraTransform.rotation);
+        Vector3 newPosition = draggingPosition + startDraggingCameraTransform.TransformDirection(objRefGrabPoint);
+        Vector3 newPositionCameraLocal = worldToLocal * newPosition;
+        Vector3 hostTransformToCameraLocal = worldToLocal * HostTransform.position;
+
+        switch (MovingMode)
+        {
+            case MovingModeEnum.ForwardBackward:
+                newPositionCameraLocal.x = hostTransformToCameraLocal.x;
+                newPositionCameraLocal.y = hostTransformToCameraLocal.y;
+                break;
+            case MovingModeEnum.LeftRight:
+                newPositionCameraLocal.y = hostTransformToCameraLocal.y;
+                newPositionCameraLocal.z = hostTransformToCameraLocal.z;
+                break;
+            case MovingModeEnum.UpDown:
+                newPositionCameraLocal.x = hostTransformToCameraLocal.x;
+                newPositionCameraLocal.z = hostTransformToCameraLocal.z;
+                break;
+            case MovingModeEnum.Lock:
+                return;
+        }
+
+        newPosition = localToWorld * newPositionCameraLocal;
+
+        switch (MovingMode)
+        {
+            case MovingModeEnum.ForwardBackward:
+                newPosition.y = oldPosition.y;
+                break;
+            case MovingModeEnum.LeftRight:
+                newPosition.y = oldPosition.y;
+                break;
+            case MovingModeEnum.UpDown:
+                newPosition.x = oldPosition.x;
+                newPosition.z = oldPosition.z;
+                break;
+            case MovingModeEnum.Lock:
+                return;
+        }
+        HostTransform.position = Vector3.Lerp(HostTransform.position, newPosition, PositionLerpSpeed);
     }
 
     /// <summary>

@@ -34,7 +34,6 @@ public class TapManager : MonoBehaviour, IInputClickHandler
 
     private void HandleTap()
     {
-        Debug.Log("Cursor position: " + cursor.transform.position.ToString());
         LevelSolver.Instance.PlaceObject_OnFloor_NearPoint(desk, cursor.transform.position);
     }
 
