@@ -35,6 +35,7 @@ public class ObjectMenuData : MonoBehaviour {
     public void DisableAll()
     {
         ActiveGameObject.GetComponent<HandDraggable>().MovingMode = HandDraggable.MovingModeEnum.Lock;
+        ActiveGameObject.GetComponent<HandDraggable>().StopDragging();
         ActiveGameObject.GetComponent<HandDraggable>().enabled = false;
     }
 }

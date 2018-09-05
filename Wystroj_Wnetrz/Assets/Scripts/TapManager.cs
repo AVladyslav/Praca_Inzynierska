@@ -7,8 +7,9 @@ using UnityEngine;
 
 public class TapManager : MonoBehaviour, IInputClickHandler
 {
-    public GameObject desk;
-    private GameObject cursor;
+    //public GameObject desk;
+    //private GameObject cursor;
+    public GameObject ObjectListMenuManager;
 
     public void OnInputClicked(InputClickedEventData eventData)
     {
@@ -34,13 +35,22 @@ public class TapManager : MonoBehaviour, IInputClickHandler
 
     private void HandleTap()
     {
-        LevelSolver.Instance.PlaceObject_OnFloor_NearPoint(desk, cursor.transform.position);
+        //LevelSolver.Instance.PlaceObject_OnFloor_NearPoint(desk, cursor.transform.position);
+        //  if objectmenu active, disable and reset
+        if (GameObject.Find("DataManager").GetComponent<PublicData>().ObjectMenu.activeInHierarchy)
+        {
+            GameObject.Find("DataManager").GetComponent<PublicData>().ObjectMenu.GetComponent<ObjectMenuData>().DisableAll();
+            GameObject.Find("DataManager").GetComponent<PublicData>().ObjectMenu.GetComponent<ObjectMenuData>().ActiveGameObject = null;
+            GameObject.Find("DataManager").GetComponent<PublicData>().ObjectMenu.SetActive(false);
+        }
+        
+        ObjectListMenuManager.GetComponent<ObjectListMenuManager>().ShowMenu();
     }
 
     // Use this for initialization
     void Start () {
         InputManager.Instance.PushFallbackInputHandler(gameObject); //handle Tap gesture anywhere, excluding gameObjects
-        cursor = GameObject.Find("DefaultCursor") as GameObject;
+        //cursor = GameObject.Find("DefaultCursor") as GameObject;
         if (!LevelSolver.Instance.IsSolverInitialized)
             LevelSolver.Instance.InitializeSolver();
 

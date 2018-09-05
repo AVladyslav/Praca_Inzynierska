@@ -212,16 +212,11 @@ public class LevelSolver : MonoBehaviour
             if ((result.Result.Position.y < alignment.CeilingYValue) &&
                 (result.Result.Position.y > alignment.FloorYValue))
             {
-                GameObject newGameObject = UnityEngine.Object.Instantiate(result.MyGameObject, result.Result.Position, Quaternion.LookRotation(result.Result.Forward, Vector3.up));
+                //GameObject newGameObject = UnityEngine.Object.Instantiate(result.MyGameObject, result.Result.Position, Quaternion.LookRotation(result.Result.Forward, Vector3.up));
+                GameObject newGameObject = UnityEngine.Object.Instantiate(result.MyGameObject, result.Result.Position, result.MyGameObject.transform.rotation);
                 newGameObject.AddComponent<HandDraggable>().enabled = false;
                 newGameObject.AddComponent<BoxCollider>();
-                newGameObject.AddComponent<ObjectProperties>();
                 newGameObject.AddComponent<OnObjectTap>();
-                ObjectProperties newObjectProperties = newGameObject.GetComponent<ObjectProperties>();
-                if (!newObjectProperties.IsPropertiesAreSet)
-                {
-                    newObjectProperties.SetProperties(new ObjectProperties.ObjProperties(Placement.Floor, ObjectType.Table, "Table"));
-                }
             }
         }
 

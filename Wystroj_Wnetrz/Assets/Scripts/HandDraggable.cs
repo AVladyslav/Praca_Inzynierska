@@ -47,7 +47,7 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
         Lock
     }
 
-    public MovingModeEnum MovingMode = MovingModeEnum.ForwardBackward;
+    public MovingModeEnum MovingMode = MovingModeEnum.Lock;
 
     [Tooltip("Controls the speed at which the object will interpolate toward the desired position")]
     [Range(0.01f, 1.0f)]

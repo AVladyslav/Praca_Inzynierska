@@ -10,6 +10,20 @@ public class OnObjectTap : MonoBehaviour, IInputClickHandler
     public void OnInputClicked(InputClickedEventData eventData)
     {
         GameObject objectMenu = GameObject.Find("DataManager").GetComponent<PublicData>().ObjectMenu;
+        if (objectMenu.activeInHierarchy)
+        {
+            objectMenu.GetComponent<ObjectMenuData>().DisableAll();
+            objectMenu.GetComponent<ObjectMenuData>().ActiveGameObject = null;
+            objectMenu.SetActive(false);
+        }
+
+        //hide menu with list if it is visible
+        GameObject objectListMenu = GameObject.Find("ObjectListMenu");
+        if (objectListMenu != null && objectListMenu.activeInHierarchy)
+        {
+            objectListMenu.SetActive(false);
+        }
+
         objectMenu.transform.position = CalculatePosition();
         objectMenu.transform.rotation = CalculateRotation();
         objectMenu.SetActive(true);
@@ -36,7 +50,7 @@ public class OnObjectTap : MonoBehaviour, IInputClickHandler
 
         GameObject cursor = GameObject.Find("DefaultCursor") as GameObject;
         Vector3 cursorPositionToCameraLocal = CameraCache.Main.transform.InverseTransformPoint(cursor.transform.position);
-        position = cursorPositionToCameraLocal + new Vector3(0, 0, -0.5f);  //pół metra przed objektem
+        position = cursorPositionToCameraLocal + new Vector3(0, 0, -0.2f);  //przed objektem
         position = CameraCache.Main.transform.TransformPoint(position);
         position.y = 0;
 
