@@ -35,7 +35,7 @@ public class CreateAllButtons : MonoBehaviour {
         {
             toPlace.Add(go);
             GameObject button = InstantiateButton();
-#if UNITY_EDITOR
+#if UNITY_EDITOR    //  creating and saving icons for objects
             Texture2D texture2D = AssetPreview.GetAssetPreview(go);
             if (go.transform.rotation.x > 0)
             {
