@@ -43,7 +43,12 @@ public class TapManager : MonoBehaviour, IInputClickHandler
             GameObject.Find("DataManager").GetComponent<PublicData>().ObjectMenu.GetComponent<ObjectMenuData>().ActiveGameObject = null;
             GameObject.Find("DataManager").GetComponent<PublicData>().ObjectMenu.SetActive(false);
         }
-        
+
+        if (GameObject.Find("DataManager").GetComponent<PublicData>().ColorPickerCanvas.activeInHierarchy)
+        {
+            GameObject.Find("DataManager").GetComponent<PublicData>().ColorPickerCanvas.SetActive(false);
+        }
+
         ObjectListMenuManager.GetComponent<ObjectListMenuManager>().ShowMenu();
     }
 

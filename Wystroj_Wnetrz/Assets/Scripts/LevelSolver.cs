@@ -228,6 +228,8 @@ public class LevelSolver : MonoBehaviour
                     newGameObject.AddComponent<BoxCollider>();
                 }
                 newGameObject.AddComponent<OnObjectTap>();
+                newGameObject.AddComponent<ObjectData>();
+                newGameObject.GetComponent<ObjectData>().SetOriginalGameObject(result.MyGameObject);
             }
         }
 

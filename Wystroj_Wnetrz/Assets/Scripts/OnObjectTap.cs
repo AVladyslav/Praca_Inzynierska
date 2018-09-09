@@ -9,6 +9,11 @@ public class OnObjectTap : MonoBehaviour, IInputClickHandler
 {
     public void OnInputClicked(InputClickedEventData eventData)
     {
+        GameObject colorPickerCanvas = GameObject.Find("DataManager").GetComponent<PublicData>().ColorPickerCanvas;
+        if (colorPickerCanvas.activeInHierarchy)
+        {
+            colorPickerCanvas.SetActive(false);
+        }
         GameObject objectMenu = GameObject.Find("DataManager").GetComponent<PublicData>().ObjectMenu;
         if (objectMenu.activeInHierarchy)
         {

@@ -6,8 +6,10 @@ public class PublicData : MonoBehaviour {
 
     public GameObject ObjectMenu;
 
-	// Use this for initialization
-	void Start () {
+    public GameObject ColorPickerCanvas;
+
+    // Use this for initialization
+    void Start () {
 		
 	}
 	
