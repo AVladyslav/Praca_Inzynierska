@@ -51,6 +51,9 @@ public class InteractiveButton : Interactive
     public override void OnInputUp(InputEventData eventData)
     {
         GameObject objectListMenuManager = GameObject.Find("ObjectListMenuManager");
-        objectListMenuManager.GetComponent<ObjectListMenuManager>().PlaceGameObject(gameObject.GetComponent<ButtonData>().ToPlace);
+        //objectListMenuManager.GetComponent<ObjectListMenuManager>().PlaceGameObject(gameObject.GetComponent<ButtonData>().ToPlace);
+        var a = objectListMenuManager.GetComponent<ObjectListMenuManager>();
+        var b = gameObject.GetComponent<ButtonData>().ToPlace;
+        a.PlaceGameObject(b);
     }
 }

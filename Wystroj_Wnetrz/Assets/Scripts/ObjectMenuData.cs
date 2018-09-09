@@ -38,4 +38,11 @@ public class ObjectMenuData : MonoBehaviour {
         ActiveGameObject.GetComponent<HandDraggable>().StopDragging();
         ActiveGameObject.GetComponent<HandDraggable>().enabled = false;
     }
+
+    public void RemoveGameObject()
+    {
+        transform.parent = null;
+        Destroy(ActiveGameObject);
+        gameObject.SetActive(false);
+    }
 }

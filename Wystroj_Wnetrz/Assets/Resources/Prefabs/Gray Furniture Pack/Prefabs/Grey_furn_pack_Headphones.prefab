@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3348544}
   - component: {fileID: 2386252}
   m_Layer: 0
-  m_Name: Headphones
+  m_Name: Grey_furn_pack_Headphones
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

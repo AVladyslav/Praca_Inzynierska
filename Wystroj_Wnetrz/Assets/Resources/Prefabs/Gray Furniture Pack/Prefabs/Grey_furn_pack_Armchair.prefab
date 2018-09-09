@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3386658}
   - component: {fileID: 2313894}
   m_Layer: 0
-  m_Name: Armchair
+  m_Name: Grey_furn_pack_Armchair
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

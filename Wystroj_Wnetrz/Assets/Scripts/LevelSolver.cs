@@ -215,7 +215,18 @@ public class LevelSolver : MonoBehaviour
                 //GameObject newGameObject = UnityEngine.Object.Instantiate(result.MyGameObject, result.Result.Position, Quaternion.LookRotation(result.Result.Forward, Vector3.up));
                 GameObject newGameObject = UnityEngine.Object.Instantiate(result.MyGameObject, result.Result.Position, result.MyGameObject.transform.rotation);
                 newGameObject.AddComponent<HandDraggable>().enabled = false;
-                newGameObject.AddComponent<BoxCollider>();
+                if (newGameObject.transform.childCount > 0)
+                {
+                    foreach (Transform child in newGameObject.transform)
+                    {
+                        child.gameObject.AddComponent<BoxCollider>();
+                        child.gameObject.AddComponent<OnChildTap>();
+                    }
+                }
+                else
+                {
+                    newGameObject.AddComponent<BoxCollider>();
+                }
                 newGameObject.AddComponent<OnObjectTap>();
             }
         }
@@ -360,12 +371,50 @@ public class LevelSolver : MonoBehaviour
     public void PlaceObject_OnFloor_NearPoint(GameObject gameObject, Vector3 point)
     {
         List<PlacementQuery> placementQuery = new List<PlacementQuery>();
-        Vector3 halfDimSize = gameObject.GetComponent<Renderer>().bounds.size * 0.5f;
+        Vector3 halfDimSize;
+
+        // Some parent gameobjects does not have a renderer, but their child(s) has. Calculate half dimension size for gameobject
+        if (gameObject.GetComponent<Renderer>() == null)
+        {
+            /*
+            Bounds bounds = new Bounds();
+            foreach (Transform child in gameObject.transform)
+            {
+                var bounds_temp = child.gameObject.GetComponent<Renderer>().bounds;
+                bounds_temp.center.Scale(child.gameObject.transform.localScale);
+                bounds_temp.size.Scale(child.gameObject.transform.localScale);
+                bounds.Encapsulate(bounds_temp);
+            }
+            bounds.size.Scale(gameObject.transform.localScale);
+            halfDimSize = bounds.size * 0.5f;
+            */
+            Quaternion currentRotation = gameObject.transform.rotation;
+            gameObject.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+
+            Bounds bounds = new Bounds(gameObject.transform.position, Vector3.zero);
+
+            foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>())
+            {
+                bounds.Encapsulate(renderer.bounds);
+            }
+
+            Vector3 localCenter = bounds.center - gameObject.transform.position;
+            bounds.center = localCenter;
+            Debug.Log("The local bounds of this model is " + bounds);
+
+            gameObject.transform.rotation = currentRotation;
+            halfDimSize = bounds.size * 0.5f;
+        }
+        else
+        {
+            halfDimSize = gameObject.GetComponent<Renderer>().bounds.size * 0.5f;
+        }
+
 
         placementQuery.Add(
             new PlacementQuery(gameObject, SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDimSize),
                                 new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>() {
-                                    SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(gameObject.GetComponent<Renderer>().bounds.size.x),
+                                    SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(halfDimSize.x * 2),
                                 },
                                 new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint>() {
                                     SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearPoint(point)

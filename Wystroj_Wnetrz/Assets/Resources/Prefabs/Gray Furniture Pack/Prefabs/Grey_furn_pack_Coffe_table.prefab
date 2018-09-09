@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3382228}
   - component: {fileID: 2393234}
   m_Layer: 0
-  m_Name: Coffe_table
+  m_Name: Grey_furn_pack_Coffe_table
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

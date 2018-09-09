@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2378858}
   - component: {fileID: 9512786}
   m_Layer: 0
-  m_Name: Table
+  m_Name: Furn_model_Table
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -43,7 +43,7 @@ GameObject:
   m_Component:
   - component: {fileID: 438598}
   m_Layer: 0
-  m_Name: Door
+  m_Name: Grey_furn_pack_Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

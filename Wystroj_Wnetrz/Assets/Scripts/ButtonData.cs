@@ -29,20 +29,4 @@ public class ButtonData : MonoBehaviour {
         }
         return value;
     }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.collider.name == "VisibleArea")
-        {
-            //TODO dokończyć kolizje
-        }
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.collider.name == "VisibleArea")
-        {
-            //TODO dokończyć kolizje
-        }
-    }
 }

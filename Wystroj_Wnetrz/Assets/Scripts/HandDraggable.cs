@@ -154,20 +154,6 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
         localToWorld = CameraCache.Main.transform.localToWorldMatrix;
         worldToLocal = CameraCache.Main.transform.worldToLocalMatrix;
 
-        Debug.Log("Dragging is started.");
-
-        //TODO: dokończyć
-        /*switch (gameObject.tag)
-        {
-            case Placement.Floor.ToString():
-                break;
-            case Placement.Ceiling:
-                break;
-            case Placement.Wall:
-                break;
-            default:
-                break;
-        }*/
 
         objRefForward = objForward;
         objRefUp = objUp;
@@ -250,10 +236,9 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
             draggingRotation = Quaternion.LookRotation(objForward, objUp);
         }
 
+        // Apply Final Position
         SetNewPositionForObject();
 
-        // Apply Final Position
-        //HostTransform.position = Vector3.Lerp(HostTransform.position, draggingPosition + cameraTransform.TransformDirection(objRefGrabPoint), PositionLerpSpeed);
         // Apply Final Rotation
         HostTransform.rotation = Quaternion.Lerp(HostTransform.rotation, draggingRotation, RotationLerpSpeed);
 

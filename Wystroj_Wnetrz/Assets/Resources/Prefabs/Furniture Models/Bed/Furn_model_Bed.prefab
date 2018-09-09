@@ -10,7 +10,7 @@ GameObject:
   - component: {fileID: 449420}
   - component: {fileID: 9518102}
   m_Layer: 0
-  m_Name: Bed
+  m_Name: Furn_model_Bed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
