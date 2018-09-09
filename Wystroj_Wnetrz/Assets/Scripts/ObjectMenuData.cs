@@ -32,9 +32,24 @@ public class ObjectMenuData : MonoBehaviour {
         ActiveGameObject.GetComponent<HandDraggable>().enabled = true;
         ActiveGameObject.GetComponent<HandDraggable>().MovingMode = HandDraggable.MovingModeEnum.UpDown;
     }
+
+    public void EnableRotationY()
+    {
+        ActiveGameObject.GetComponent<HandDraggable>().enabled = true;
+        ActiveGameObject.GetComponent<HandDraggable>().RotationMode = HandDraggable.RotationModeEnum.YAxisRotation;
+    }
+
+    public void EnableAllAxesScale()
+    {
+        ActiveGameObject.GetComponent<HandDraggable>().enabled = true;
+        ActiveGameObject.GetComponent<HandDraggable>().ScaleMode = HandDraggable.ScaleModeEnum.AllAxesScale;
+    }
+
     public void DisableAll()
     {
         ActiveGameObject.GetComponent<HandDraggable>().MovingMode = HandDraggable.MovingModeEnum.Lock;
+        ActiveGameObject.GetComponent<HandDraggable>().RotationMode = HandDraggable.RotationModeEnum.LockObjectRotation;
+        ActiveGameObject.GetComponent<HandDraggable>().ScaleMode = HandDraggable.ScaleModeEnum.LockObjectScale;
         ActiveGameObject.GetComponent<HandDraggable>().StopDragging();
         ActiveGameObject.GetComponent<HandDraggable>().enabled = false;
     }

@@ -29,16 +29,6 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
     [Tooltip("Scale by which hand movement in z is multiplied to move the dragged object.")]
     public float DistanceScale = 2f;
 
-    public enum RotationModeEnum
-    {
-        Default,
-        LockObjectRotation,
-        OrientTowardUser,
-        OrientTowardUserAndKeepUpright
-    }
-
-    public RotationModeEnum RotationMode = RotationModeEnum.LockObjectRotation;
-
     public enum MovingModeEnum
     {
         ForwardBackward,
@@ -46,8 +36,22 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
         UpDown,
         Lock
     }
-
     public MovingModeEnum MovingMode = MovingModeEnum.Lock;
+
+    public enum RotationModeEnum
+    {
+        LockObjectRotation,
+        YAxisRotation
+    }
+    public RotationModeEnum RotationMode = RotationModeEnum.LockObjectRotation;
+
+    public enum ScaleModeEnum
+    {
+        LockObjectScale,
+        AllAxesScale
+    }
+    public ScaleModeEnum ScaleMode = ScaleModeEnum.LockObjectScale;
+
 
     [Tooltip("Controls the speed at which the object will interpolate toward the desired position")]
     [Range(0.01f, 1.0f)]
@@ -68,6 +72,7 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
     private float handRefDistance;
     private Vector3 objRefGrabPoint;
 
+    private Vector3 oldDraggingPosition;
     private Vector3 draggingPosition;
     private Quaternion draggingRotation;
 
@@ -154,7 +159,6 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
         localToWorld = CameraCache.Main.transform.localToWorldMatrix;
         worldToLocal = CameraCache.Main.transform.worldToLocalMatrix;
 
-
         objRefForward = objForward;
         objRefUp = objUp;
 
@@ -199,8 +203,6 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
     /// </summary>
     private void UpdateDragging()
     {
-        Debug.Log("position = " + startDraggingCameraTransform.position + ", rotation = " + startDraggingCameraTransform.rotation);
-
         Vector3 newHandPosition;
         //Transform cameraTransform = CameraCache.Main.transform;
         currentInputSource.TryGetPosition(currentInputSourceId, out newHandPosition);
@@ -219,40 +221,80 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
         float distanceOffset = distanceRatio > 0 ? (distanceRatio - 1f) * DistanceScale : 0;
         float targetDistance = objRefDistance + distanceOffset;
 
+        oldDraggingPosition = draggingPosition;
         draggingPosition = pivotPosition + (targetDirection * targetDistance);
 
-        if (RotationMode == RotationModeEnum.OrientTowardUser || RotationMode == RotationModeEnum.OrientTowardUserAndKeepUpright)
+        if (MovingMode != MovingModeEnum.Lock)
         {
-            draggingRotation = Quaternion.LookRotation(HostTransform.position - pivotPosition);
-        }
-        else if (RotationMode == RotationModeEnum.LockObjectRotation)
-        {
-            draggingRotation = HostTransform.rotation;
-        }
-        else // RotationModeEnum.Default
-        {
-            Vector3 objForward = startDraggingCameraTransform.TransformDirection(objRefForward); // in world space
-            Vector3 objUp = startDraggingCameraTransform.TransformDirection(objRefUp);   // in world space
-            draggingRotation = Quaternion.LookRotation(objForward, objUp);
+            // Apply Final Position
+            SetNewPositionForObject();
         }
 
-        // Apply Final Position
-        SetNewPositionForObject();
-
-        // Apply Final Rotation
-        HostTransform.rotation = Quaternion.Lerp(HostTransform.rotation, draggingRotation, RotationLerpSpeed);
-
-        if (RotationMode == RotationModeEnum.OrientTowardUserAndKeepUpright)
+        if (RotationMode != RotationModeEnum.LockObjectRotation)
         {
-            Quaternion upRotation = Quaternion.FromToRotation(HostTransform.up, Vector3.up);
-            HostTransform.rotation = upRotation * HostTransform.rotation;
+            // Apply Final Rotation
+            SetNewRotationForObject();
         }
+
+        if (ScaleMode != ScaleModeEnum.LockObjectScale)
+        {
+            //  Apply Final Scale
+            SetNewScaleForObject();
+        }
+    }
+
+    private void SetNewScaleForObject()
+    {
+        Vector3 oldDragingPositionCameraLocal = worldToLocal * oldDraggingPosition;
+        Vector3 dragingPositionCameraLocal = worldToLocal * draggingPosition;
+
+        switch (ScaleMode)
+        {
+            case ScaleModeEnum.AllAxesScale:
+                //case MovingModeEnum.LeftRight:
+                if (dragingPositionCameraLocal.y > oldDragingPositionCameraLocal.y)
+                {
+                    //  Scale up
+                    ScaleByAllAxes(true);
+                }
+                else
+                {
+                    if (dragingPositionCameraLocal.y < oldDragingPositionCameraLocal.y)
+                    {
+                        //  Scale down
+                        ScaleByAllAxes(false);
+                    }
+                }
+                break;
+            case ScaleModeEnum.LockObjectScale:
+                return;
+        }
+    }
+
+    private void ScaleByAllAxes(bool scaleUp)
+    {
+        float scaleFactor;
+        if (scaleUp)
+        {
+            scaleFactor = 0.005f;
+        }
+        else
+        {
+            scaleFactor = -0.005f;
+        }
+
+        Transform objectMenuTransform = transform.Find("ObjectMenu");
+        objectMenuTransform.parent = null;
+
+        // Scaling GameObject
+        HostTransform.localScale += HostTransform.localScale * scaleFactor;
+
+        objectMenuTransform.parent = HostTransform;
     }
 
     private void SetNewPositionForObject()
     {
         Vector3 oldPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
-        Debug.Log("cameraTransform. pos + rot. = " + startDraggingCameraTransform.position + startDraggingCameraTransform.rotation);
         Vector3 newPosition = draggingPosition + startDraggingCameraTransform.TransformDirection(objRefGrabPoint);
         Vector3 newPositionCameraLocal = worldToLocal * newPosition;
         Vector3 hostTransformToCameraLocal = worldToLocal * HostTransform.position;
@@ -293,6 +335,49 @@ public class HandDraggable : MonoBehaviour, IFocusable, IInputHandler, ISourceSt
                 return;
         }
         HostTransform.position = Vector3.Lerp(HostTransform.position, newPosition, PositionLerpSpeed);
+    }
+    
+    private void SetNewRotationForObject()
+    {
+        Vector3 oldDragingPositionCameraLocal = worldToLocal * oldDraggingPosition;
+        Vector3 dragingPositionCameraLocal = worldToLocal * draggingPosition;
+
+        switch (RotationMode)
+        {
+            case RotationModeEnum.YAxisRotation:
+                //case MovingModeEnum.LeftRight:
+                if (dragingPositionCameraLocal.x < oldDragingPositionCameraLocal.x)
+                {
+                    //  Rotate right
+                    RotateAroundYAxis(true);
+                }
+                else
+                {
+                    if (dragingPositionCameraLocal.x > oldDragingPositionCameraLocal.x)
+                    {
+                        //  Rotate left
+                        RotateAroundYAxis(false);
+                    }
+                }
+                break;
+            case RotationModeEnum.LockObjectRotation:
+                return;
+        }
+    }
+
+    private void RotateAroundYAxis(bool directionRight)
+    {
+        float angle;
+        if (directionRight)
+        {
+            angle = 1f;
+        }
+        else
+        {
+            angle = -1f;
+        }
+
+        HostTransform.Rotate(Vector3.up, angle, Space.World);
     }
 
     /// <summary>
